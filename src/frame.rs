@@ -1,5 +1,4 @@
-use glium::{Program, Frame};
-use audio::AudioContext;
+use glium::Frame;
 use {TextureInstanceIdMap, FontInstanceIdMap};
 use color::Color;
 use font::FontInstanceId;

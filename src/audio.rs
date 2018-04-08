@@ -1,7 +1,10 @@
 //! Rodio-based audio system
 
-use rodio::{default_endpoint, Endpoint, Sink};
+use rodio::{default_endpoint, Endpoint, Sink, Decoder};
 use std::{thread, sync::mpsc};
+use FastHashMap;
+use std::collections::hash_map::Entry::{Occupied, Vacant};
+use std::io::Cursor;
 
 /// Core audio context, maintains a handle to the background audio thread
 pub struct AudioContext {
@@ -26,6 +29,12 @@ pub enum Speaker {
     Mono,
     /// Spatial audio
     Stereo { left: f32, right: f32 },
+}
+
+impl Default for Speaker {
+    fn default() -> Self {
+        Speaker::Mono
+    }
 }
 
 pub enum AudioAction {
@@ -78,22 +87,23 @@ impl AudioCache {
 
     /// Updates or inserts a new song, based on the audio message
     pub fn upsert(&mut self, msg: AudioMsg) -> Result<(), AudioDataNotLoaded> {
-        
-        match self.active_songs.entry(&msg.song) {
+        use self::AudioAction::*;
+
+        match self.active_songs.entry(msg.song) {
             Occupied(o) => {
                 match msg.action {
                     Start { .. } => { },
                     AdjustVolume(vol) => {
-                        let vol = msg.volume / 100.0;
-                        if o.volume != vol {
-                            o.sink.set_volume(vol);
+                        let vol = vol / 100.0;
+                        if o.get().volume != vol {
+                            o.get().sink.set_volume(vol);
                         }
                     },
                     Pause => {
-                        o.sink.pause();
+                        o.get().sink.pause();
                     },
                     Play => {
-                        o.sink.play();
+                        o.get().sink.play();
                     },
                     _ => {
                         #[cfg(debug_assertions)]
@@ -103,12 +113,12 @@ impl AudioCache {
             },
             Vacant(v) => {
                 match msg.action {
-                    Start { data, do_loop } => {
+                    Start { song_data, do_loop } => {
                         // insert a new song
                         let sink = Sink::new(&self.endpoint);
-                        let decoder = Decoder::new(Cursor::new(data)).unwrap();
+                        let decoder = Decoder::new(Cursor::new(song_data)).unwrap();
                         sink.append(decoder);
-                        v.insert(sink);
+                        v.insert(AudioSink { sink: sink, volume: 1.0 });
                     },
                     _ => {
                         return Err(AudioDataNotLoaded);
@@ -133,12 +143,12 @@ impl AudioContext {
         }
     }
 
-    pub fn send_msg(&self, msg: AudioMsg) -> Result<(), mpsc::SendError<&'static str>> {
+    pub fn send_msg(&self, msg: AudioMsg) -> Result<(), mpsc::SendError<AudioMsg>> {
         self.sender.send(msg)
     }
 
     // music loop that runs on a background thread
-    fn music_loop(rx: mpsc::Receiver<&'static str>) {
+    fn music_loop(rx: mpsc::Receiver<AudioMsg>) {
         let mut audio_cache = AudioCache::new();
         while let Ok(event) = rx.recv() {
             audio_cache.upsert(event).unwrap_or_else(|e| {

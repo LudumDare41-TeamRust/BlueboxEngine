@@ -1,6 +1,6 @@
 //! Constants for easier access to the assets
 
-use texture::{SourcePixelRegion, TextureId, SourceTextureRegion, TextureInstanceId};
+use texture::{SourcePixelRegion, TextureId, SourceTextureRegion};
 use errors::LevelLoadError;
 use FastHashMap;
 
@@ -21,8 +21,8 @@ pub struct Level {
 
 pub(crate) fn load_level(level_id: LevelId) -> Result<Level, LevelLoadError> {
     
-    use std::fs::{self, File};
-    use std::io::{Cursor, Read};
+    use std::fs::File;
+    use std::io::Read;
 
     let current_exe_path = ::std::env::current_exe()?;
     let mut gamedata_path = current_exe_path.parent().ok_or(LevelLoadError::InvalidParentDirectory)?.to_path_buf();

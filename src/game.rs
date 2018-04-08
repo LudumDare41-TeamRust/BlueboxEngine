@@ -1,12 +1,14 @@
 //! Main game state
 
 use player_state::PlayerState;
+use audio::{AudioMsg, AudioAction, Speaker};
+use assets::LevelId;
 use camera::Camera;
 use renderer::Renderer;
 use audio::AudioContext;
 use color::Color;
-use physics::{PhysicsWorld, PhysicsFinalizedData};
-use {ShaderHashMap, FontInstanceIdMap, TextureInstanceIdMap, FastHashMap};
+use physics::{PhysicsFinalizedData};
+use {ShaderHashMap, FontInstanceIdMap, TextureInstanceIdMap};
 use font::FontInstanceId;
 use texture::TextureInstanceId;
 use frame::GameFrame;
@@ -53,8 +55,7 @@ impl GameState {
                         x: [0.0, 0.0, 0.0, 0.0],
                         y: [0.0, 0.0, 0.0, 0.0],
                         data: Box::new(UiRendererData {
-                            /* important! the start button has a tag - its ID */
-                            tag: Some(::assets::START_SCREEN_BUTTON_00_ID),
+                            tag: Some("yellow_button04.png"),
                             actions: UiActions {
                                 onmouseenter: Some(::actions::start_game_enter),
                                 onmouseleave: Some(::actions::start_game_leave),
@@ -72,13 +73,21 @@ impl GameState {
         }
     }
 
-    pub fn get_song(&self) -> &'static str {
+    pub fn get_song(&self) -> AudioMsg {
         match *self {
             GameState::StartMenu => {
-                ::assets::AUDIO_MSG_PLAY_TITLE_SCREEN_SONG
+                AudioMsg {
+                    song: String::from("title_screen.ogg"),
+                    action: AudioAction::Play,
+                    speaker: Speaker::Mono,
+                }
             },
             GameState::Game(_) => {
-                ::assets::AUDIO_MSG_PLAY_GAME_SONG
+                AudioMsg {
+                    song: String::from("level1.ogg"),
+                    action: AudioAction::Play,
+                    speaker: Speaker::Mono,
+                }
             }
         }
     }
@@ -97,32 +106,29 @@ impl Game {
         // -- initialize shaders
         let mut renderer = Renderer::new(width, height).unwrap();
 
+        // TODO: remove unwrap
+        let assets = ::assets::load_level(LevelId(1)).unwrap();
+
         // -- initialize fonts
         let mut available_font_ids = FontInstanceIdMap::default();
-
-        let font_instance_big_id = renderer.context.add_font(::assets::FONT_ID, ::assets::FONT_BIG_SIZE, Cursor::new(::assets::FONT));
-        available_font_ids.insert(FONT_BIG_ID, font_instance_big_id);
-
-        let font_instance_medium_id = renderer.context.add_font(::assets::FONT_ID, ::assets::FONT_MEDIUM_SIZE, Cursor::new(::assets::FONT));
-        available_font_ids.insert(FONT_MEDIUM_ID, font_instance_medium_id);
-
-        let font_instance_small_id = renderer.context.add_font(::assets::FONT_ID, ::assets::FONT_SMALL_SIZE, Cursor::new(::assets::FONT));
-        available_font_ids.insert(FONT_SMALL_ID, font_instance_small_id);
+        for (font_id, font_data) in &assets.font_data {
+            // currently, we render each font 3 times: once big, once medium and once small
+            // this is unnecessary
+            let font_instance_big_id = renderer.context.add_font(font_id, ::assets::FONT_BIG_SIZE, Cursor::new(font_data));
+            available_font_ids.insert(FONT_BIG_ID, font_instance_big_id);
+            let font_instance_medium_id = renderer.context.add_font(font_id, ::assets::FONT_MEDIUM_SIZE, Cursor::new(font_data));
+            available_font_ids.insert(FONT_MEDIUM_ID, font_instance_medium_id);
+            let font_instance_small_id = renderer.context.add_font(font_id, ::assets::FONT_MEDIUM_SIZE, Cursor::new(font_data));
+            available_font_ids.insert(FONT_SMALL_ID, font_instance_small_id);
+        }
 
         // -- initialize textures
         let mut available_texture_ids = TextureInstanceIdMap::default();
-
-        let texture_start_game = renderer.context.add_texture_png(::assets::START_SCREEN_BUTTON_00_ID, Cursor::new(::assets::START_SCREEN_BUTTON_00));
-        available_texture_ids.insert(TEXTURE_START_GAME_ID, texture_start_game);
-
-        let texture_hero_char = renderer.context.add_texture_png(::assets::HERO_TEXTURE_ID, Cursor::new(::assets::HERO_TEXTURE));
-        available_texture_ids.insert(TEXTURE_HERO_CHARACTER_ID, texture_hero_char);
-
-        let texture_crate = renderer.context.add_texture_png(::assets::CRATE_TEXTURE_ID, Cursor::new(::assets::CRATE_TEXTURE_DATA));
-        available_texture_ids.insert(TEXTURE_CRATE_ID, texture_crate);
-
-        let texture_background = renderer.context.add_texture_png(::assets::BACKGROUND_3_TEXTURE_ID, Cursor::new(::assets::BACKGROUND_3_TEXTURE_DATA));
-        available_texture_ids.insert(TEXTURE_BACKGROUND_ID, texture_background);
+        for (texture_id, (texture_data, opt_texture_region)) in &assets.image_data {
+            // TODO: the texture regione goes unused
+            let texture_start_game = renderer.context.add_texture_png(texture_id, Cursor::new(texture_data));
+            available_texture_ids.insert(texture_id, texture_start_game);
+        }
 
         Self {
             renderer: renderer,
@@ -136,7 +142,6 @@ impl Game {
     /// Main game loop
     pub fn run_main_loop(&mut self) {
 
-        use glium::Surface;
         use glium::backend::Facade;
         use glium::glutin::MouseCursor;
         use input::GameInputEvent;
@@ -207,7 +212,6 @@ fn show_start_menu(frame: &mut GameFrame, display: &Rc<Context>, shaders: &Shade
 {
     use glium::Surface;
     use texture::TargetPixelRegion;
-    use ui::{Ui, UiRect, UiRendererData, UiActions};
     use texture::TextureDrawOptions;
 
     frame.clear_screen(Color::light_blue());
@@ -244,7 +248,7 @@ fn show_start_menu(frame: &mut GameFrame, display: &Rc<Context>, shaders: &Shade
     let button_arr_y = [top, top, bottom, bottom];
 
     {
-        let start_btn = ui.get_mut_rect_by_tag(::assets::START_SCREEN_BUTTON_00_ID);
+        let start_btn = ui.get_mut_rect_by_tag("yellow_button04.png");
 
         start_btn.x = button_arr_x;
         start_btn.y = button_arr_y;
@@ -298,14 +302,11 @@ fn draw_text_with_shadow(frame: &mut GameFrame, text: &str, font: &FontInstanceI
 fn show_game(frame: &mut GameFrame, display: &Rc<Context>, shaders: &ShaderHashMap,
              game_finalized_data: &PhysicsFinalizedData, camera: &Camera)
 {
-    use glium::Surface;
-
     frame.clear_screen(Color::light_blue());
     draw_background(frame, display, shaders, game_finalized_data);
     draw_highscore(frame, display, shaders, game_finalized_data);
     draw_crates(frame, display, shaders, game_finalized_data);
     draw_character(frame, display, shaders, game_finalized_data);
-
 }
 
 fn draw_background(frame: &mut GameFrame, display: &Rc<Context>, shaders: &ShaderHashMap,

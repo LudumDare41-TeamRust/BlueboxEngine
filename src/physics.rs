@@ -3,8 +3,7 @@
 //! Calculates the physics for the game world, returns a description of the world
 //! in world coordinates
 
-use player_state::{PlayerSpritePosition, PlayerState};
-use input::GameInputEvent;
+use player_state::PlayerSpritePosition;
 use std::time::Instant;
 
 /// If the player presses a key, he should arrive at his goal (with linear interpolation)

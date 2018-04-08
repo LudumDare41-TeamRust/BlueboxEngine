@@ -3,8 +3,7 @@ use std::io::{BufRead, Seek};
 use glium::texture::CompressedSrgbTexture2d;
 use glium::backend::{Context, Facade};
 use glium::texture::RawImage2d;
-use glium::{DrawParameters, VertexBuffer, Program, Frame};
-use ui::UiRect;
+use glium::{DrawParameters, VertexBuffer, Frame};
 use std::rc::Rc;
 use ShaderHashMap;
 use std::cell::Cell;
@@ -107,8 +106,6 @@ impl TextureSystem {
                         shaders: &ShaderHashMap, draw_options: TextureDrawOptions)
     {
         use glium::{Surface, Blend, Depth};
-        use glium::draw_parameters::DepthTest;
-        use glium::draw_parameters::DepthClamp;
 
         let shader = shaders.get(::context::PIXEL_TO_SCREEN_SHADER_ID).unwrap();
         let texture = self.textures.get(&texture_id.source_texture_region.texture_id).unwrap();

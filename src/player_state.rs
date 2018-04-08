@@ -1,5 +1,5 @@
 use camera::Camera;
-use physics::{PhysicsWorld, PhysicsFinalizedData, PlayerResult, MAX_SPEED, CratePosition};
+use physics::{PhysicsWorld, PhysicsFinalizedData, PlayerResult, CratePosition};
 use input::GameInputEvent;
 use std::time::{Duration, Instant};
 

@@ -1,6 +1,6 @@
 //! Font data that needs to be rendered
 
-use glium_text::{self, TextSystem, FontTexture, TextDisplay};
+use glium_text::{self, TextSystem, FontTexture};
 use glium::backend::Facade;
 use glium::Frame;
 
