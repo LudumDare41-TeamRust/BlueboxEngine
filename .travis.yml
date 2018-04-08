@@ -1,0 +1,23 @@
+language: rust
+
+script:
+  - cargo build
+  - RUST_BACKTRACE=1 cargo test
+
+sudo: false
+
+cache: cargo
+
+os:
+  - linux
+  - osx
+  
+rust:
+  - stable
+  - beta
+  - nightly
+
+matrix:
+  allow_failures:
+    - rust: nightly
+  fast_finish: true
