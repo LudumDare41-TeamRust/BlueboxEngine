@@ -1,9 +1,5 @@
-use glium::{self, Display, Frame, IndexBuffer, PolygonMode, Program, VertexBuffer};
-use glium::backend::Facade;
+use glium;
 use glium::index::{NoIndices, PrimitiveType};
-use glium::texture::CompressedSrgbTexture2d;
-use glium_text::{TextSystem, FontTexture};
-
 use std::io::{BufRead, Seek, Read};
 
 use errors::Error as AppError;
@@ -43,10 +39,8 @@ impl OpenGlContext {
         height: u32,
     ) -> Result<Self, AppError>
     {
-        use glium::DisplayBuild;
-        use glium::glutin::{WindowBuilder, GlRequest};
-        use glium::debug::DebugCallbackBehavior;
-        use glium::Surface;
+        use glium::{Program, DisplayBuild};
+        use glium::glutin::GlRequest;
         use glium::glutin;
 
         let display = glutin::WindowBuilder::new()
@@ -80,13 +74,13 @@ impl OpenGlContext {
     }
 
     // load a font
-    pub fn add_font<R>(&mut self, id: &'static str, size: u32, source: R)
+    pub fn add_font<R>(&mut self, id: String, size: u32, source: R)
         -> FontInstanceId where R: Read
     {
         self.font_system.add_font(id, size, source, &self.display)
     }
 
-    pub fn add_texture_png<R>(&mut self, id: &'static str, source: R)
+    pub fn add_texture_png<R>(&mut self, id: String, source: R)
         -> TextureId
         where R: BufRead + Seek
     {

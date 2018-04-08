@@ -1,5 +1,4 @@
-use glium::{Program, Frame};
-use audio::AudioContext;
+use glium::Frame;
 use {TextureInstanceIdMap, FontInstanceIdMap};
 use color::Color;
 use font::FontInstanceId;
@@ -36,12 +35,12 @@ impl<'a> GameFrame<'a> {
     // notice: panics if the font isn't valid!!!
     pub fn get_font(&self, id: &'static str) -> FontInstanceId {
         let font_id = self.font_ids.get(id);
-        *font_id.unwrap()
+        font_id.unwrap().clone()
     }
 
     pub fn get_texture(&self, id: &'static str) -> TextureId {
         let texture_id = self.texture_ids.get(id);
-        *texture_id.unwrap()
+        texture_id.unwrap().clone()
     }
 
     pub fn calculate_font_width(&self, id: &FontInstanceId, text: &str) -> f32 {

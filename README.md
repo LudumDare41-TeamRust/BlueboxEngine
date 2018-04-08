@@ -1,6 +1,10 @@
-# Ludum Dare 40 - Stack Boxes
+# Bluebox Engine
 
 ## Installation
+
+```
+sudo apt install libasound2-dev
+```
 
 ```
 # Windows only, for getting freetype to work

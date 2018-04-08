@@ -1,6 +1,6 @@
 //! Font data that needs to be rendered
 
-use glium_text::{self, TextSystem, FontTexture, TextDisplay};
+use glium_text::{self, TextSystem, FontTexture};
 use glium::backend::Facade;
 use glium::Frame;
 
@@ -9,9 +9,9 @@ use std::io::Read;
 use color::Color;
 use FastHashMap;
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct FontInstanceId {
-    pub font_name: &'static str,
+    pub font_name: String,
     pub font_size: u32,
 }
 
@@ -31,7 +31,7 @@ impl FontSystem {
         }
     }
 
-    pub fn add_font<R, F>(&mut self, id: &'static str, size: u32, source: R, display: &F)
+    pub fn add_font<R, F>(&mut self, id: String, size: u32, source: R, display: &F)
         -> FontInstanceId where R: Read, F: Facade
     {
         let id = FontInstanceId {

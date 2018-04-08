@@ -4,13 +4,6 @@
 
 #![windows_subsystem = "windows"]
 
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_macros)]
-#![allow(unused_doc_comment)]
-#![allow(unused_variables)]
-#![allow(unused_assignments)]
-
 #![cfg_attr(feature = "clippy", feature(plugin))]
 #![cfg_attr(feature = "clippy", plugin(clippy))]
 #![warn(trivial_numeric_casts,
@@ -27,12 +20,14 @@
 #![cfg_attr(feature = "clippy", warn(unseparated_literal_suffix))]
 #![cfg_attr(feature = "clippy", warn(wrong_pub_self_convention))]
 
+#![deny(unused_must_use)]
+
 #[macro_use] extern crate glium;
 extern crate image;
 extern crate glium_text;
 extern crate twox_hash;
-extern crate cpal;
-extern crate lewton;
+extern crate toml;
+extern crate rodio;
 
 pub mod input;
 pub mod renderer;
@@ -54,8 +49,9 @@ pub mod actions;
 
 pub type FastHashMap<T, U> = ::std::collections::HashMap<T, U, ::std::hash::BuildHasherDefault<::twox_hash::XxHash>>;
 pub type FontInstanceIdMap = FastHashMap<&'static str, font::FontInstanceId>;
-pub type TextureInstanceIdMap = FastHashMap<&'static str, texture::TextureId>;
+pub type TextureInstanceIdMap = FastHashMap<String, texture::TextureId>;
 pub type ShaderHashMap = FastHashMap<&'static str, ::glium::Program>;
+pub type SourceTextureRegionMap = FastHashMap<String, ::texture::SourceTextureRegion>;
 
 fn main() {
     let mut game = game::Game::new(800, 600);

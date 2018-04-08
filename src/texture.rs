@@ -3,15 +3,14 @@ use std::io::{BufRead, Seek};
 use glium::texture::CompressedSrgbTexture2d;
 use glium::backend::{Context, Facade};
 use glium::texture::RawImage2d;
-use glium::{DrawParameters, VertexBuffer, Program, Frame};
-use ui::UiRect;
+use glium::{DrawParameters, VertexBuffer, Frame};
 use std::rc::Rc;
 use ShaderHashMap;
 use std::cell::Cell;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TextureId {
-    pub texture_id: &'static str,
+    pub texture_id: String,
 }
 
 pub struct TextureSystem {
@@ -47,7 +46,7 @@ pub struct TargetPixelRegion {
     pub screen_height: u32,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SourceTextureRegion {
     /// Texture ID for looking it up in the TextureSystem at runtime
     pub texture_id: TextureId,
@@ -55,7 +54,7 @@ pub struct SourceTextureRegion {
     pub region: SourcePixelRegion,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TextureInstanceId {
     pub source_texture_region: SourceTextureRegion,
     pub target_texture_region: TargetPixelRegion,
@@ -86,7 +85,7 @@ impl TextureSystem {
         Self::default()
     }
 
-    pub fn add_png_texture<R, F>(&mut self, id: &'static str, source: R, display: &F)
+    pub fn add_png_texture<R, F>(&mut self, id: String, source: R, display: &F)
         -> TextureId
         where R: BufRead + Seek, F: Facade
     {
@@ -107,8 +106,6 @@ impl TextureSystem {
                         shaders: &ShaderHashMap, draw_options: TextureDrawOptions)
     {
         use glium::{Surface, Blend, Depth};
-        use glium::draw_parameters::DepthTest;
-        use glium::draw_parameters::DepthClamp;
 
         let shader = shaders.get(::context::PIXEL_TO_SCREEN_SHADER_ID).unwrap();
         let texture = self.textures.get(&texture_id.source_texture_region.texture_id).unwrap();

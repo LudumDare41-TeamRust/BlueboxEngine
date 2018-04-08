@@ -1,6 +1,5 @@
 //! Input handling module, handles incoming events for the window
 
-use glium;
 use glium::glutin::{Event, MouseCursor, ElementState,VirtualKeyCode, MouseButton};
 
 use std::time::{Duration, Instant};
