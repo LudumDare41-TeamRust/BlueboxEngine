@@ -4,13 +4,6 @@
 
 #![windows_subsystem = "windows"]
 
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_macros)]
-#![allow(unused_doc_comment)]
-#![allow(unused_variables)]
-#![allow(unused_assignments)]
-
 #![cfg_attr(feature = "clippy", feature(plugin))]
 #![cfg_attr(feature = "clippy", plugin(clippy))]
 #![warn(trivial_numeric_casts,
@@ -31,8 +24,7 @@
 extern crate image;
 extern crate glium_text;
 extern crate twox_hash;
-extern crate cpal;
-extern crate lewton;
+extern crate rodio;
 
 pub mod input;
 pub mod renderer;
