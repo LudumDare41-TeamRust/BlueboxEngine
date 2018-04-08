@@ -33,6 +33,7 @@ extern crate glium_text;
 extern crate twox_hash;
 extern crate cpal;
 extern crate lewton;
+extern crate zip;
 
 pub mod input;
 pub mod renderer;
