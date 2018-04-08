@@ -1,0 +1,25 @@
+[package]
+name = "ludum-dare-40"
+version = "0.1.0"
+authors = ["Felix Schütt <felix.schuett@maps4print.com>"]
+
+[dependencies]
+glium_text = { git = "https://github.com/fschutt/glium_text" }
+image = "0.17.0"
+twox-hash = "1.1.0"
+cpal = { git = "https://github.com/fschutt/cpal" }
+lewton = { git = "https://github.com/RustAudio/lewton" }
+
+[dependencies.glium]
+git = "https://github.com/fschutt/glium-backport"
+branch = "glium_backport"
+features = ["glutin"]
+
+[profile.release]
+panic = "abort"
+debug = false
+lto = true
+
+# cross compile: i686-pc-windows-gnu
+[package.metadata]
+rustc-env = "PKG_CONFIG_ALLOW_CROSS=1"
