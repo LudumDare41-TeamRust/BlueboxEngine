@@ -132,10 +132,10 @@ impl Game {
         // -- initialize textures
         let mut available_texture_ids = TextureInstanceIdMap::default();
         let mut texture_regions = SourceTextureRegionMap::default();
-        for (texture_id, (texture_data, opt_texture_region)) in &assets.image_data {
+        for (texture_id, &(ref texture_data, ref opt_texture_region)) in &assets.image_data {
             let texture_start_game = renderer.context.add_texture_png(texture_id.clone(), Cursor::new(texture_data));
             available_texture_ids.insert(texture_id.clone(), texture_start_game);
-            if let Some(opt_texture_region) = opt_texture_region {
+            if let Some(ref opt_texture_region) = *opt_texture_region {
                 texture_regions.insert(opt_texture_region.texture_id.texture_id.clone(), opt_texture_region.clone());
             } 
         }

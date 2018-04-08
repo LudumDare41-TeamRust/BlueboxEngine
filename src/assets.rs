@@ -148,7 +148,7 @@ fn load_source_texture_regions_toml(texture_region_file: &mut File)
     let toml = file_contents.parse::<Value>()?;
     match toml {
         Value::Table(table) => {
-            let texture_regions: Vec<(&String, &Value)> = table.iter().filter(|(k,v)| *k == "textures").collect();
+            let texture_regions: Vec<(&String, &Value)> = table.iter().filter(|&(k,_)| *k == "textures").collect();
             let mut source_texture_hash_map = FastHashMap::default();
 
             for (texture_key, texture_description) in texture_regions {
