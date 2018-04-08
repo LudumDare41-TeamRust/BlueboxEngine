@@ -8,8 +8,7 @@ glium_text = { git = "https://github.com/fschutt/glium_text" }
 image = "0.17.0"
 twox-hash = "1.1.0"
 toml = "0.4.6"
-cpal = { git = "https://github.com/fschutt/cpal" }
-lewton = { git = "https://github.com/RustAudio/lewton" }
+rodio = "0.6.0"
 
 [dependencies.glium]
 git = "https://github.com/fschutt/glium-backport"
