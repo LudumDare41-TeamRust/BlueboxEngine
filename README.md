@@ -3,6 +3,10 @@
 ## Installation
 
 ```
+sudo apt install libasound2-dev
+```
+
+```
 # Windows only, for getting freetype to work
 git clone https://github.com/PistonDevelopers/binaries 
 git clone https://github.com/LudumDare41-TeamRust/BlueboxEngine

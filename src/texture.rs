@@ -9,9 +9,9 @@ use std::rc::Rc;
 use ShaderHashMap;
 use std::cell::Cell;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TextureId {
-    pub texture_id: &'static str,
+    pub texture_id: String,
 }
 
 pub struct TextureSystem {
@@ -47,7 +47,7 @@ pub struct TargetPixelRegion {
     pub screen_height: u32,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SourceTextureRegion {
     /// Texture ID for looking it up in the TextureSystem at runtime
     pub texture_id: TextureId,
@@ -55,7 +55,7 @@ pub struct SourceTextureRegion {
     pub region: SourcePixelRegion,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TextureInstanceId {
     pub source_texture_region: SourceTextureRegion,
     pub target_texture_region: TargetPixelRegion,
@@ -96,7 +96,7 @@ impl TextureSystem {
         let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
         let opengl_texture = CompressedSrgbTexture2d::new(display, image).unwrap();
 
-        let id = TextureId { texture_id: id };
+        let id = TextureId { texture_id: id.to_string() };
         self.textures.insert(id.clone(), opengl_texture);
         id
     }
