@@ -74,13 +74,13 @@ impl OpenGlContext {
     }
 
     // load a font
-    pub fn add_font<R>(&mut self, id: &'static str, size: u32, source: R)
+    pub fn add_font<R>(&mut self, id: String, size: u32, source: R)
         -> FontInstanceId where R: Read
     {
         self.font_system.add_font(id, size, source, &self.display)
     }
 
-    pub fn add_texture_png<R>(&mut self, id: &'static str, source: R)
+    pub fn add_texture_png<R>(&mut self, id: String, source: R)
         -> TextureId
         where R: BufRead + Seek
     {

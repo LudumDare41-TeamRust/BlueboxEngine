@@ -25,7 +25,8 @@ pub(crate) fn load_level(level_id: LevelId) -> Result<Level, LevelLoadError> {
     use std::io::Read;
 
     let current_exe_path = ::std::env::current_exe()?;
-    let mut gamedata_path = current_exe_path.parent().ok_or(LevelLoadError::InvalidParentDirectory)?.to_path_buf();
+    let mut gamedata_path = current_exe_path.parent()
+        .ok_or(LevelLoadError::InvalidParentDirectory)?.to_path_buf();
     gamedata_path.push("gamedata");
     
     if !gamedata_path.is_dir() {
@@ -82,7 +83,7 @@ pub(crate) fn load_level(level_id: LevelId) -> Result<Level, LevelLoadError> {
                     let file_size = entry.metadata().and_then(|m| Ok(m.len())).unwrap_or(0);
                     let mut data = Vec::with_capacity(file_size as usize);
                     let mut file = File::open(entry.path())?;
-                    file.read_to_end(&mut data);
+                    file.read_to_end(&mut data).unwrap();
                     $hashmap.insert(file_name, data);
                 }
             }
@@ -91,7 +92,7 @@ pub(crate) fn load_level(level_id: LevelId) -> Result<Level, LevelLoadError> {
 
     // load /images directory
     let mut images = FastHashMap::default();
-    if let Some(dir) = images_directory {
+    if let Some(ref dir) = images_directory {
         for entry in ::std::fs::read_dir(dir)? {
             let entry = entry?;
             if entry.path().is_dir() {
@@ -102,15 +103,15 @@ pub(crate) fn load_level(level_id: LevelId) -> Result<Level, LevelLoadError> {
             let file_size = entry.metadata().and_then(|m| Ok(m.len())).unwrap_or(0);
             let mut data = Vec::with_capacity(file_size as usize);
             let mut file = File::open(entry.path())?;
-            file.read_to_end(&mut data);
+            file.read_to_end(&mut data).unwrap();
             images.insert(file_name, (data, None));
         }
     }
 
-    if let Some(images_directory) = images_directory {
+    if let Some(ref images_directory) = images_directory {
         let mut source_texture_regions_file_path = images_directory.clone();
         source_texture_regions_file_path.push("pixel_regions.toml");
-        let source_texture_regions_file = File::open(source_texture_regions_file_path.as_path())?;
+        let mut source_texture_regions_file = File::open(source_texture_regions_file_path.as_path())?;
         let source_texture_regions = load_source_texture_regions_toml(&mut source_texture_regions_file)?;
         for (k, v) in source_texture_regions {
             if let Some(image) = images.get_mut(&k) {
@@ -147,19 +148,24 @@ fn load_source_texture_regions_toml(texture_region_file: &mut File)
     let toml = file_contents.parse::<Value>()?;
     match toml {
         Value::Table(table) => {
-            let texture_regions: Vec<(&String, &Value)> = table.iter().filter(|(k,v)| k.as_ref() == "textures").collect()?;
+            let texture_regions: Vec<(&String, &Value)> = table.iter().filter(|(k,v)| *k == "textures").collect();
             let mut source_texture_hash_map = FastHashMap::default();
 
             for (texture_key, texture_description) in texture_regions {
                 let texture_description = texture_description.as_table().ok_or(LevelLoadError::InvalidToml)?;
                 
-                let texture_state = texture_description.get("state").ok_or(LevelLoadError::InvalidToml)?.as_str().unwrap_or("default".into());
-                let texture_bottom_x = texture_description.get("bottom_x").ok_or(LevelLoadError::InvalidToml)?.as_integer().unwrap_or(0) as u32;
-                let texture_bottom_y = texture_description.get("bottom_y").ok_or(LevelLoadError::InvalidToml)?.as_integer().unwrap_or(0) as u32;
-                let texture_width = texture_description.get("width").ok_or(LevelLoadError::InvalidToml)?.as_integer().unwrap_or(0) as u32;
-                let texture_height = texture_description.get("height").ok_or(LevelLoadError::InvalidToml)?.as_integer().unwrap_or(0) as u32;
+                let texture_state = texture_description.get("state")
+                    .ok_or(LevelLoadError::InvalidToml)?.as_str().unwrap_or("default".into());
+                let texture_bottom_x = texture_description.get("bottom_x")
+                    .ok_or(LevelLoadError::InvalidToml)?.as_integer().unwrap_or(0) as u32;
+                let texture_bottom_y = texture_description.get("bottom_y")
+                    .ok_or(LevelLoadError::InvalidToml)?.as_integer().unwrap_or(0) as u32;
+                let texture_width = texture_description.get("width")
+                    .ok_or(LevelLoadError::InvalidToml)?.as_integer().unwrap_or(0) as u32;
+                let texture_height = texture_description.get("height")
+                    .ok_or(LevelLoadError::InvalidToml)?.as_integer().unwrap_or(0) as u32;
 
-                source_texture_hash_map.insert(*texture_key, SourceTextureRegion {
+                source_texture_hash_map.insert(texture_key.clone(), SourceTextureRegion {
                     texture_id: TextureId { texture_id: format!("{}#{}", texture_key, texture_state) },
                     region: SourcePixelRegion {
                         bottom_x: texture_bottom_x,

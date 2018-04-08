@@ -1,4 +1,4 @@
-# Ludum Dare 40 - Stack Boxes
+# Bluebox Engine
 
 ## Installation
 

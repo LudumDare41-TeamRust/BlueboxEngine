@@ -9,7 +9,7 @@ use std::io::Cursor;
 /// Core audio context, maintains a handle to the background audio thread
 pub struct AudioContext {
     sender: mpsc::Sender<AudioMsg>,
-    thread_handle: thread::JoinHandle<()>,
+    thread_handle: Option<thread::JoinHandle<()>>,
 }
 
 /// An audio message 
@@ -90,13 +90,13 @@ impl AudioCache {
         use self::AudioAction::*;
 
         match self.active_songs.entry(msg.song) {
-            Occupied(o) => {
+            Occupied(mut o) => {
                 match msg.action {
                     Start { .. } => { },
                     AdjustVolume(vol) => {
                         let vol = vol / 100.0;
                         if o.get().volume != vol {
-                            o.get().sink.set_volume(vol);
+                            o.get_mut().sink.set_volume(vol);
                         }
                     },
                     Pause => {
@@ -139,7 +139,7 @@ impl AudioContext {
         let thread_handle = thread::spawn(move || Self::music_loop(rx));
         Self {
             sender: tx,
-            thread_handle: thread_handle,
+            thread_handle: Some(thread_handle),
         }
     }
 
@@ -161,6 +161,6 @@ impl AudioContext {
 
 impl Drop for AudioContext {
     fn drop(&mut self) {
-        self.thread_handle.join().unwrap();
+        self.thread_handle.take().unwrap().join().unwrap();
     }
 }

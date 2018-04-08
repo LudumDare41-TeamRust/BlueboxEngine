@@ -85,7 +85,7 @@ impl TextureSystem {
         Self::default()
     }
 
-    pub fn add_png_texture<R, F>(&mut self, id: &'static str, source: R, display: &F)
+    pub fn add_png_texture<R, F>(&mut self, id: String, source: R, display: &F)
         -> TextureId
         where R: BufRead + Seek, F: Facade
     {
@@ -95,7 +95,7 @@ impl TextureSystem {
         let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
         let opengl_texture = CompressedSrgbTexture2d::new(display, image).unwrap();
 
-        let id = TextureId { texture_id: id.to_string() };
+        let id = TextureId { texture_id: id };
         self.textures.insert(id.clone(), opengl_texture);
         id
     }
